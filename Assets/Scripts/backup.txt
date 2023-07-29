@@ -1,0 +1,36 @@
+
+    [SerializeField] List<Texture2D> imageSet;
+    [SerializeField] MeshRenderer planeRenderer;
+
+    private void LoadSampleImageSet()
+    {
+        imageSet = new List<Texture2D>();
+        
+        for (int i = 0; i < Konstanta.OUTPUT_SIZE; i++) {
+            for (int j=16; j<20; j++) {
+                imageSet.Add(DatasetRegister.GetInstance().GetTexture(i,j+1));
+            }
+        }
+        
+    }
+
+    int rnd;
+
+    public void RefreshSample() {
+        rnd = Random.Range(0,imageSet.Count-1);
+        planeRenderer.material.SetTexture("_MainTex", imageSet[rnd]);
+    }
+
+    public void TestImages() {
+        float[,,] testInputImage = new float[1,1,1];
+        Noedify_Utils.ImportImageData(ref testInputImage, imageSet[rnd], true);
+        solver.Evaluate(net, testInputImage, Noedify_Solver.SolverMethod.MainThread);
+        int prediction = Noedify_Utils.ConvertOneHotToInt(solver.prediction);
+        predictionText.text = Konstanta.GetHuruf(prediction);
+    }
+
+    private void Update() {
+        if(Input.GetKeyUp(KeyCode.T)) {
+            TestImages();
+        }
+    }
